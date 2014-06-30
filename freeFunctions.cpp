@@ -1,11 +1,10 @@
-#include <fstream>
-#include <sstream>
+
 #include <iostream>
-
-#include <QRegExp>
+#include <string>
 #include <QFile>
+#include <QRegExp>
 #include <QTextStream>
-
+#include <QDebug>
 #include "freeFunctions.h"
 
 void readData(const QString &fileName, QString &content )
@@ -30,95 +29,87 @@ throw ( EmptyArgument, FileOpenError, FileReadError )
         throw FileReadError( fileName.toStdString( ), functionName );
     }
 
-    QString tempContent( data );
-    content = tempContent;
+    content = QString( data );
 }
 
-bool isAllDigits( const QString &content )
-throw( EmptyArgument )
+void parseContentToPersons( const QString &content, std::vector<Person> &persons )
+throw ( EmptyArgument )
 {
-    std::string functionName = "isAllDigits()";
+    std::string functionName = "parseContentToPersons()";
 
     // Check the input argument
     if ( content.isEmpty( ) ) {
         throw EmptyArgument( functionName );
     }
 
-    bool isDigits = true;
-
-    QRegExp regExp( "\\D" );
+    QRegExp regExp("(\\w+) (\\w+)");
     int pos = 0;
     while ( ( pos = regExp.indexIn( content, pos ) ) != -1 ) {
-        QRegExp regExpWhiteSpace( "\\s|-" );
-        if ( regExpWhiteSpace.indexIn( regExp.cap( 0 ) ) == -1 ) {
-            isDigits = false;
-            break;
-        }
-
+        QString firstName = regExp.cap( 1 );
+        QString lastName = regExp.cap( 2 );
+        Person person( firstName, lastName );
+        persons.push_back( person );
         pos += regExp.matchedLength( );
     }
-
-    return isDigits;
 }
 
-void parseToIntArray( const QString &source, std::vector<int> &destination )
-throw ( EmptyArgument, OutOfRange, NotNumber )
+void parsePersonsToStrContent( const std::vector<Person> &persons,
+                               QString &content)
+throw ( EmptyArgument )
 {
-    std::string functionName = "parseToIntArray()";
+    std::string functionName = "parsePersonsToStrContent()";
 
     // Check the input argument
-    if ( source.isEmpty( ) ) {
+    if ( persons.empty( ) ) {
         throw EmptyArgument( functionName );
     }
 
-    // Is not all digits?
-    if ( !isAllDigits( source ) ) {
-        throw NotNumber( functionName );
-    }
-
-    // Get all digits
-    QRegExp regExp( "(\\d+)" );
-    int pos = 0;
-    while ( ( pos = regExp.indexIn( source, pos ) ) != -1 ) {
-        // Get the value
-        int value = regExp.cap( 0 ).toInt( );
-
-        // Check for OutOfRange error
-        int beginOfRange = -100;
-        int endOfRange = 100;
-        if ( ( value < beginOfRange ) || ( endOfRange < value ) ) {
-            throw OutOfRange( functionName, value, beginOfRange, endOfRange );
-        }
-
-        // Save the integer value
-        destination.push_back( value );
-
-        pos += regExp.matchedLength( );
+    for ( std::size_t i = 0; i < persons.size( ); ++i ) {
+        QString firstName = persons[i].firstName( );
+        QString lastName = persons[i].lastName( );
+        QString line = QString( "%1 %2\n" ).arg( firstName ).arg( lastName );
+        content.append( line );
     }
 }
 
-void writeData(const QString &fileName, const std::vector<int> &arr )
+void writeData( const QString &fileName, const QString &content )
 throw ( EmptyArgument, FileOpenError, FileWriteError )
 {
     std::string functionName = "writeData()";
 
     // Check arguments
-    if ( fileName.isEmpty( ) || arr.empty( ) ) {
+    if ( fileName.isEmpty( ) || content.isEmpty( ) ) {
         throw EmptyArgument( functionName );
     }
 
     // Open the output file for writing
     QFile file( fileName );
-    if ( !(file.open( QIODevice::WriteOnly ) ) ) {
+    if ( !( file.open( QIODevice::WriteOnly ) ) ) {
         throw FileOpenError( fileName.toStdString( ), functionName );
     }
 
     // Write data to the output file
     QTextStream stream( &file );
-    for ( std::size_t i = 0; i < arr.size( ); i++ ) {
-        stream << arr[i] << endl;
-        if ( stream.status() != QTextStream::Ok ) {
-            throw FileWriteError( fileName.toStdString( ), functionName );
-        }
+    stream << content;
+    if ( stream.status() != QTextStream::Ok ) {
+        throw FileWriteError( fileName.toStdString( ), functionName );
+    }
+}
+
+void printData( const std::vector<Person> &persons )
+throw ( EmptyArgument )
+{
+    std::string functionName = "printData()";
+
+    // Check the input argument
+    if ( persons.empty( ) ) {
+        throw EmptyArgument( functionName );
+    }
+
+    // Print data
+    for ( std::size_t i = 0; i < persons.size( ); ++i ) {
+        std::cout << "First Name: " << persons[i].firstName( ).toStdString( ) << std::endl;
+        std::cout << "Last Name: " << persons[i].lastName( ).toStdString( ) << std::endl;
+        std::cout << std::endl;
     }
 }

@@ -10,5 +10,4 @@ HEADERS += \
     FileReadError.h \
     FileWriteError.h \
     EmptyArgument.h \
-    OutOfRange.h \
-    NotNumber.h
+    Person.h

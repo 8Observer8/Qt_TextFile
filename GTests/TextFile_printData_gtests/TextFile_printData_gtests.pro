@@ -10,4 +10,3 @@ HEADERS += \
 SOURCES += \
     ../../freeFunctions.cpp \
     main.cpp
-

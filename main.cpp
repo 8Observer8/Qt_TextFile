@@ -1,19 +1,48 @@
 #include <iostream>
-#include <string>
 #include <vector>
 #include <QString>
 #include "freeFunctions.h"
-#include "LogicError.h"
-#include "FileError.h"
 
 int main( )
 {
-    // Read data from the input file
-    QString fileNameIn = "input.txt";
-    QString content;
+    // Person array for saving
+    Person david( "David", "White");
+    Person ivan( "Ivan", "Green" );
+    std::vector<Person> persons;
+    persons.push_back( david );
+    persons.push_back( ivan );
 
+    // Parse the person array to the string content
+    QString content;
     try {
-        readData( fileNameIn, content );
+        parsePersonsToStrContent( persons, content );
+    } catch( const LogicError &e ) {
+        std::cerr << e.what( ) << std::endl;
+        return 1;
+    } catch( ... ) {
+        std::cerr << "Error: unknown exception" << std::endl;
+        return 1;
+    }
+
+    // Save the string content to the file
+    QString fileName = "file.txt";
+    try {
+        writeData( fileName, content );
+    } catch ( const LogicError &e ) {
+        std::cerr << e.what( ) << std::endl;
+        return 1;
+    } catch ( const FileError &e ) {
+        std::cerr << e.what( ) << std::endl;
+        return 1;
+    } catch ( ... ) {
+        std::cerr << "Error: unknown exception" << std::endl;
+        return 1;
+    }
+
+    // Read the string content from the file
+    QString readContent;
+    try {
+        readData( fileName, readContent );
     } catch ( const LogicError &e ) {
         std::cerr << e.what( ) << std::endl;
         return 1;
@@ -25,26 +54,22 @@ int main( )
         return 1;
     }
 
-    // Parse the content to the integer array
-    std::vector<int> arr;
+    // Parse the string content to the person array
+    std::vector<Person> readPersons;
     try {
-        parseToIntArray( content, arr );
-    } catch ( const LogicError &e ) {
+        parseContentToPersons( readContent, readPersons );
+    } catch( const LogicError &e ) {
         std::cerr << e.what( ) << std::endl;
         return 1;
-    } catch ( ... ) {
+    } catch( ... ) {
         std::cerr << "Error: unknown exception" << std::endl;
         return 1;
     }
 
-    // Write data to the output file
-    QString fileNameOut = "output.txt";
+    // Print the person array on the screen
     try {
-        writeData( fileNameOut, arr );
-    } catch ( const LogicError &e ) {
-        std::cerr << e.what( ) << std::endl;
-        return 1;
-    } catch ( const FileError &e ) {
+        printData( readPersons );
+    } catch( const LogicError &e ) {
         std::cerr << e.what( ) << std::endl;
         return 1;
     } catch ( ... ) {

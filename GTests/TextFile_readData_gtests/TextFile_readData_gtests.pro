@@ -5,7 +5,8 @@ LIBS += "C:/GTEST/lib/libGoogleTest.a"
 INCLUDEPATH += "../../"
 
 HEADERS += \
-    ../../NotNumber.h
+    ../../freeFunctions.h
 
 SOURCES += \
+    ../../freeFunctions.cpp \
     main.cpp
