@@ -1,7 +1,9 @@
+
 #include <iostream>
 #include <vector>
 #include <QString>
 #include "freeFunctions.h"
+#include "Person.h"
 
 int main( )
 {
